@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration status = "WARN">
+    <Appenders>
+        <Console name = "Console" target = "SYSTEM_OUT">
+            <PatternLayout pattern = "%d{dd.MM.yyyy HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <File name = "File" fileName = "logs/msg.log">
+            <PatternLayout pattern = "%d{dd.MM.yyyy HH:mm:ss} %-5level MSG: %msg%n"/>
+        </File>
+        <File name = "Users" fileName = "logs/users.log">
+            <PatternLayout pattern = "%d{dd.MM.yyyy HH:mm:ss} %-5level: %msg%n"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Root level = "ERROR">
+            <AppenderRef ref = "Console"/>
+        </Root>
+        <Logger name = "msg" level = "TRACE" additivity = "FALSE">
+            <AppenderRef ref = "File"/>
+            <AppenderRef ref = "Console"/>
+        </Logger>
+        <Logger name = "usr" level = "TRACE" additivity = "FALSE">
+            <AppenderRef ref = "Users"/>
+            <AppenderRef ref = "Console"/>
+        </Logger>
+        <Logger name = "csl" level = "TRACE" additivity = "FALSE">
+            <AppenderRef ref = "Console"/>
+        </Logger>
+    </Loggers>
+</configuration>
