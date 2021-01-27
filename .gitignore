@@ -4,3 +4,4 @@ target/
 .idea/
 src/main/resources/config.properties
 src/main/resources/hibernate.cfg.xml
+logs/msg.log

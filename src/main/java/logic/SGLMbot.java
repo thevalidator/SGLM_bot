@@ -338,6 +338,8 @@ public class SGLMbot extends TelegramLongPollingBot {
                 sendTextMessage(update, CurrencyParser.getUSDprice(), false);
             } else if(text.equalsIgnoreCase("/eur")) {
                 sendTextMessage(update, CurrencyParser.getEURprice(), false);
+            } else if(text.equalsIgnoreCase("/tsla")) {
+                sendTextMessage(update, CurrencyParser.getTSLAprice(), false);
             } else if(text.equalsIgnoreCase("/name")) {
                 String messageText = "Приветствую вас, ".concat(update.getMessage().getFrom().getFirstName())
                         .concat("!");

@@ -19,7 +19,8 @@ public class Main {
 /*        System.out.println(CurrencyParser.getUSDprice());
         System.out.println(CurrencyParser.getEURprice());
         System.out.println(CurrencyParser.getBTCPrice());
-        System.out.println(CurrencyParser.getETHPrice());*/
+        System.out.println(CurrencyParser.getETHPrice());
+        System.out.println(CurrencyParser.getTSLAprice());*/
 
         startBot();
 
