@@ -3,6 +3,7 @@ package logic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 
 public class User {
@@ -20,11 +21,13 @@ public class User {
     private Address address;
     private Subscription subscription;
     private String description;
+    private HashMap<String, StockSettings> stocks;
 //    private boolean isVIP;
     //.format(DateTimeFormatter.ofPattern("d.MM.yyyy - HH:mm"))
 
     public User(){
         joinStamp = LocalDateTime.now();
+        stocks = new HashMap<>();
     }
 
     public User(Integer telegramId) {

@@ -1,10 +1,12 @@
 package logic.DTO;
 
 import logic.Address;
+import logic.StockSettings;
 import logic.Subscription;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 @Entity
 @Table(name = "USERS")
@@ -36,6 +38,8 @@ public class UserDTO {
     private String description;
     @Transient
     private Subscription subscription;
+    @Transient
+    private HashMap<String, StockSettings> stocks;
 /*    @Transient
     private boolean isVIP;*/
 

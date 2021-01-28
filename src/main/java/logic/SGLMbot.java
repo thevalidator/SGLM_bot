@@ -49,7 +49,6 @@ public class SGLMbot extends TelegramLongPollingBot {
     private SGLMbot() {
         setProperties();
         loadUsers();
-        updateUsersData();
     }
 
     public static SGLMbot getInstance() {
@@ -96,7 +95,6 @@ public class SGLMbot extends TelegramLongPollingBot {
                 addUserPhoneNumber(update);
             }
         }
-
 
     }
 
@@ -200,8 +198,7 @@ public class SGLMbot extends TelegramLongPollingBot {
     public static void updateUserName(User user) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            Query query = session.createQuery("update UserDTO set user_name = :name where telegram_id = " +
-                    ":id");
+            Query query = session.createQuery("update UserDTO set user_name = :name where telegram_id = :id");
             query.setParameter("name", user.getName());
             query.setParameter("id", user.getTelegramId());
             query.executeUpdate();
@@ -216,8 +213,7 @@ public class SGLMbot extends TelegramLongPollingBot {
     public static void updateUserFirstName(User user) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            Query query = session.createQuery("update UserDTO set first_name = :fname where telegram_id = " +
-                    ":id");
+            Query query = session.createQuery("update UserDTO set first_name = :fname where telegram_id = :id");
             query.setParameter("fname", user.getFirstName());
             query.setParameter("id", user.getTelegramId());
             query.executeUpdate();
@@ -232,8 +228,7 @@ public class SGLMbot extends TelegramLongPollingBot {
     public static void updateUserLastName(User user) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            Query query = session.createQuery("update UserDTO set last_name = :lname where telegram_id = " +
-                    ":id");
+            Query query = session.createQuery("update UserDTO set last_name = :lname where telegram_id = :id");
             query.setParameter("lname", user.getLastName());
             query.setParameter("id", user.getTelegramId());
             query.executeUpdate();
@@ -266,24 +261,6 @@ public class SGLMbot extends TelegramLongPollingBot {
         }
     }
 
-    private static void updateUsersData() {
-
-   /*     for(Map.Entry<Integer, User> entry: core.getUserList().entrySet()) {
-            entry.getValue();
-        }
-
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-
-
-            transaction.commit();
-            INFO.info("userID: " + " updated in DB.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-    }
-
 // не принимает сообщения от некоторых пользователей (из-за NULL в фамилии валидатор не работает)
     private static void checkUserInDB(Update update) {
         int id = update.getMessage().getFrom().getId();
@@ -300,7 +277,8 @@ public class SGLMbot extends TelegramLongPollingBot {
                 user.setName(update.getMessage().getFrom().getUserName());
                 updateUserName(user);
             }
-            if(user.getFirstName() != null && !user.getFirstName().equals(update.getMessage().getFrom().getFirstName())) {
+            if(user.getFirstName() != null && !user.getFirstName().equals(update.getMessage().getFrom()
+                    .getFirstName())) {
                 user.setFirstName(update.getMessage().getFrom().getFirstName());
                 updateUserFirstName(user);
             }
@@ -331,15 +309,22 @@ public class SGLMbot extends TelegramLongPollingBot {
             if(text.equalsIgnoreCase("/start")) {
                 sendTextMessage(update, Commands.HELLO, true);
             } else if(text.equalsIgnoreCase("/btc")) {
-                sendTextMessage(update, CurrencyParser.getBTCPrice(), false);
+                sendTextMessage(update, CurrencyParser.getBTCPrice().concat(" USD"), false);
             } else if(text.equalsIgnoreCase("/eth")) {
-                sendTextMessage(update, CurrencyParser.getETHPrice(), false);
+                sendTextMessage(update, CurrencyParser.getETHPrice().concat(" USD"), false);
             } else if(text.equalsIgnoreCase("/usd")) {
-                sendTextMessage(update, CurrencyParser.getUSDprice(), false);
+                sendTextMessage(update, CurrencyParser.getUSDprice().concat(" RUB"), false);
             } else if(text.equalsIgnoreCase("/eur")) {
-                sendTextMessage(update, CurrencyParser.getEURprice(), false);
+                sendTextMessage(update, CurrencyParser.getEURprice().concat(" RUB"), false);
             } else if(text.equalsIgnoreCase("/tsla")) {
-                sendTextMessage(update, CurrencyParser.getTSLAprice(), false);
+                sendTextMessage(update, CurrencyParser.getTSLAprice().concat(" USD"), false);
+            } else if(text.equalsIgnoreCase("/tslamrk")) {
+                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaMarker()), false);
+            } else if(text.matches("/tslanew \\d+")) {
+                Matcher matcher = Pattern.compile("/tslanew (?<id>\\d+)").matcher(text);
+                matcher.find();
+                int newMarker = Integer.parseInt(matcher.group("id"));
+                CurrencyParser.setTslaMarker(newMarker);
             } else if(text.equalsIgnoreCase("/name")) {
                 String messageText = "Приветствую вас, ".concat(update.getMessage().getFrom().getFirstName())
                         .concat("!");
@@ -405,6 +390,20 @@ public class SGLMbot extends TelegramLongPollingBot {
             e.printStackTrace();
             MSG_LOG.error("Was sent by bot: " + sendMessage.getText() + " on message: "
                     + update.getMessage().getText() + " from chatId: " + update.getMessage().getChatId());
+        }
+    }
+
+    public void sendNotification(String text) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId("909651044");
+        sendMessage.setText("TSLA DOWN: " + text);
+        if(true) {
+            sendMessage.setReplyMarkup(getReplyKeyboard());
+        }
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
