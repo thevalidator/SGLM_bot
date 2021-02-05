@@ -10,14 +10,14 @@ public class CurrencyParser {
     private final static String BTC_URL = "https://www.coindesk.com/price/bitcoin";
     private final static String ETH_URL = "https://www.coindesk.com/price/ethereum";
     private final static String CBR = "https://cbr.ru/currency_base/daily/";
-   // private final static String TSLA = "https://finance.yahoo.com/quote/TSLA";
     private final static String TSLA = "https://www.marketwatch.com/investing/stock/tsla";
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:83.0)" +
             " Gecko/20100101 Firefox/83.0";
-    private final static String noData = "no data";
+    public final static String noData = "No data";
 
-    private static int tslaMarker = 835;
-    private static int tslaDelta = 40;
+    private static boolean notification = true;
+    private static int tslaHigh = 846;
+    private static int tslaLow = 830;
 
 
     /* TESLA ends in Tinkoff at 01.45 msk, in world at 04.00 msk */
@@ -25,7 +25,6 @@ public class CurrencyParser {
         String tslaPrice;
         try {
             Document webSite = establishInternetConnection(TSLA);
-            //tslaPrice = webSite.body().getElementsByClass("Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)").text();
             tslaPrice = webSite.body().select("body > div.container.container--body " +
                     "> div.region.region--intraday > div.column.column--aside > div > div.intraday__data " +
                     "> h3 > bg-quote").text();
@@ -92,19 +91,33 @@ public class CurrencyParser {
         return ethPrice;
     }
 
+    public static int getTslaHigh() {
+        return tslaHigh;
+    }
+
+    public static void setTslaHigh(int tslaHigh) {
+        CurrencyParser.tslaHigh = tslaHigh;
+    }
+
+    public static int getTslaLow() {
+        return tslaLow;
+    }
+
+    public static void setTslaLow(int tslaLow) {
+        CurrencyParser.tslaLow = tslaLow;
+    }
+
+    public static boolean hasNotification() {
+        return notification;
+    }
+
+    public static void setNotification(boolean notification) {
+        CurrencyParser.notification = notification;
+    }
+
     private static Document establishInternetConnection(String link) throws IOException {
         return Jsoup.connect(link).userAgent(USER_AGENT).timeout(7000).ignoreHttpErrors(true).get();
     }
 
-    public static int getTslaMarker() {
-        return tslaMarker;
-    }
 
-    public static void setTslaMarker(int tslaMarker) {
-        CurrencyParser.tslaMarker = tslaMarker;
-    }
-
-    public static int getTslaDelta() {
-        return tslaDelta;
-    }
 }

@@ -3,7 +3,6 @@ import logic.utils.CurrencyParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import java.io.IOException;
@@ -12,9 +11,9 @@ import java.io.IOException;
 public class Main {
 
     public static final Logger LOGGER = LogManager.getRootLogger();
-    static int seconds = 10;
+    static int seconds = 60;
     static boolean flag = true;
-    static boolean marker = false;
+    //static boolean notification = true;
     static int count = 0;
 
 
@@ -37,21 +36,18 @@ public class Main {
             try {
                 while (flag) {
                     Thread.sleep(seconds * 1_000);
-                    if(!marker) {
+                    if(CurrencyParser.hasNotification()) {
                         String teslaPrice = CurrencyParser.getTSLAprice();
-                        if (Double.parseDouble(teslaPrice) < CurrencyParser.getTslaMarker() - CurrencyParser
-                                .getTslaDelta()) {
-                            botInstance.sendNotification(teslaPrice);
-                            marker = true;
-                            flag = false;
+                        if (!teslaPrice.equals(CurrencyParser.noData)) {
+                            if (Double.parseDouble(teslaPrice) < CurrencyParser.getTslaLow()) {
+                                botInstance.sendNotification("TSLA DOWN: " + teslaPrice);
+                                CurrencyParser.setNotification(false);
+                            }
+                            if (Double.parseDouble(teslaPrice) > CurrencyParser.getTslaHigh()) {
+                                botInstance.sendNotification("TSLA UP: " + teslaPrice);
+                                CurrencyParser.setNotification(false);
+                            }
                         }
-                    }
-
-
-                    ;
-                    count++;
-                    if (count > 4) {
-                        flag = false;
                     }
                 }
             } catch (Exception e) {

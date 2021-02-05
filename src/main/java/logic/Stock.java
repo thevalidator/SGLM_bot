@@ -1,17 +1,17 @@
 package logic;
 
-public class StockSettings {
+public class Stock {
 
     private String name;
     private Double lowTarget;
     private Double highTarget;
-    private boolean marker;
+    private boolean notify;
 
-    StockSettings(String name, Double lowTarget, Double highTarget, boolean marker) {
+    Stock(String name, Double lowTarget, Double highTarget, boolean notify) {
         this.name = name;
         this.lowTarget = lowTarget;
         this.highTarget = highTarget;
-        this.marker = marker;
+        this.notify = notify;
     }
 
     public String getName() {
@@ -38,11 +38,11 @@ public class StockSettings {
         this.highTarget = highTarget;
     }
 
-    public boolean isMarker() {
-        return marker;
+    public boolean hasNotify() {
+        return notify;
     }
 
-    public void setMarker(boolean marker) {
-        this.marker = marker;
+    public void setNotify(boolean notify) {
+        this.notify = notify;
     }
 }

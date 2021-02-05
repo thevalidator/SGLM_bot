@@ -1,7 +1,7 @@
 package logic.DTO;
 
 import logic.Address;
-import logic.StockSettings;
+import logic.Stock;
 import logic.Subscription;
 
 import javax.persistence.*;
@@ -39,7 +39,7 @@ public class UserDTO {
     @Transient
     private Subscription subscription;
     @Transient
-    private HashMap<String, StockSettings> stocks;
+    private HashMap<String, Stock> stocks;
 /*    @Transient
     private boolean isVIP;*/
 

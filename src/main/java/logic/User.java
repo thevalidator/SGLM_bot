@@ -21,7 +21,7 @@ public class User {
     private Address address;
     private Subscription subscription;
     private String description;
-    private HashMap<String, StockSettings> stocks;
+    private HashMap<String, Stock> stocks;
 //    private boolean isVIP;
     //.format(DateTimeFormatter.ofPattern("d.MM.yyyy - HH:mm"))
 

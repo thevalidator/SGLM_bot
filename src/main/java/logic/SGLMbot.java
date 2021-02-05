@@ -309,22 +309,36 @@ public class SGLMbot extends TelegramLongPollingBot {
             if(text.equalsIgnoreCase("/start")) {
                 sendTextMessage(update, Commands.HELLO, true);
             } else if(text.equalsIgnoreCase("/btc")) {
-                sendTextMessage(update, CurrencyParser.getBTCPrice().concat(" USD"), false);
+                String price = CurrencyParser.getBTCPrice();
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getBTCPrice()
+                        .concat(" USD")), false);
             } else if(text.equalsIgnoreCase("/eth")) {
-                sendTextMessage(update, CurrencyParser.getETHPrice().concat(" USD"), false);
+                String price = CurrencyParser.getETHPrice();
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getETHPrice()
+                        .concat(" USD")), false);
             } else if(text.equalsIgnoreCase("/usd")) {
-                sendTextMessage(update, CurrencyParser.getUSDprice().concat(" RUB"), false);
+                String price = CurrencyParser.getUSDprice();
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getUSDprice()
+                        .concat(" RUB")), false);
             } else if(text.equalsIgnoreCase("/eur")) {
-                sendTextMessage(update, CurrencyParser.getEURprice().concat(" RUB"), false);
+                String price = CurrencyParser.getEURprice();
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getEURprice()
+                        .concat(" RUB")), false);
             } else if(text.equalsIgnoreCase("/tsla")) {
-                sendTextMessage(update, CurrencyParser.getTSLAprice().concat(" USD"), false);
-            } else if(text.equalsIgnoreCase("/tslamrk")) {
-                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaMarker()), false);
-            } else if(text.matches("/tslanew \\d+")) {
-                Matcher matcher = Pattern.compile("/tslanew (?<id>\\d+)").matcher(text);
+                String price = CurrencyParser.getTSLAprice();
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getTSLAprice()
+                        .concat(" USD")), false);
+            } else if(text.equalsIgnoreCase("/tslabell")) {
+                CurrencyParser.setNotification(true);
+            } else if(text.equalsIgnoreCase("/tslalow")) {
+                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaLow()), false);
+            } else if(text.equalsIgnoreCase("/tslahigh")) {
+                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaHigh()), false);
+            } else if(text.matches("/tslaset \\d+ \\d+")) {
+                Matcher matcher = Pattern.compile("/tslaset (?<low>\\d+) (?<high>\\d+)").matcher(text);
                 matcher.find();
-                int newMarker = Integer.parseInt(matcher.group("id"));
-                CurrencyParser.setTslaMarker(newMarker);
+                CurrencyParser.setTslaLow(Integer.parseInt(matcher.group("low")));
+                CurrencyParser.setTslaHigh(Integer.parseInt(matcher.group("high")));
             } else if(text.equalsIgnoreCase("/name")) {
                 String messageText = "Приветствую вас, ".concat(update.getMessage().getFrom().getFirstName())
                         .concat("!");
@@ -396,7 +410,7 @@ public class SGLMbot extends TelegramLongPollingBot {
     public void sendNotification(String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId("909651044");
-        sendMessage.setText("TSLA DOWN: " + text);
+        sendMessage.setText(text);
         if(true) {
             sendMessage.setReplyMarkup(getReplyKeyboard());
         }
@@ -430,7 +444,6 @@ public class SGLMbot extends TelegramLongPollingBot {
         message.setPhoto(new InputFile("AgACAgIAAxkBAAIB8F_RM2tu9WW5o0IZLpjBbOHkGvCXAALAsjEbAkCISqn" +
                 "9ISBLkvSZv52jli4AAwEAAwIAA20AA8QUBQABHgQ"));
         message.setCaption("САСАЙ МЁД - САМЫЙ ЛУЧШИЙ И ЭКОЛОГИЧЕСКИ ЧИСТЫЙ МЁД!");
-
         return message;
     }
 
