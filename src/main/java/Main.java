@@ -1,6 +1,7 @@
 import logic.Core;
 import logic.DTO.UserDTO;
 import logic.SGLMbot;
+import logic.Stock;
 import logic.User;
 import logic.utils.CurrencyParser;
 import logic.utils.HibernateUtil;
@@ -40,6 +41,13 @@ public class Main {
         SGLMbot botInstance = SGLMbot.getInstance();
         startBot(botInstance);
 
+/*        SGLMbot.loadUsers();
+        User user = Core.getInstance().getUserList().get(312898894);
+        System.out.println(user.getStocks().size());
+        for (Map.Entry<String, Stock> e: user.getStocks().entrySet()) {
+            System.out.println(e.getKey() + " " + e.getValue().getUser().getTelegramId());
+        }*/
+
 /*        User user = new User(44444, 22222L, "String name", "String firstName", "String lastName");
         user.addStock("TSLA");
         System.out.println(user.getStocks().get("TSLA").getUser().getName());
@@ -60,7 +68,7 @@ public class Main {
 //        HibernateUtil.closeSessionFactory();
 
         //stocks monitoring
-        /*new Thread(() -> {
+        new Thread(() -> {
             try {
                 while (flag) {
                     Thread.sleep(seconds * 1_000);
@@ -95,7 +103,7 @@ public class Main {
                         });});
                     }
 
-                    *//*if(CurrencyParser.hasNotification()) {
+                    /*if(CurrencyParser.hasNotification()) {
                         String teslaPrice = CurrencyParser.getTSLAprice();
                         if (!teslaPrice.equals(CurrencyParser.noData)) {
                             if (Double.parseDouble(teslaPrice) < CurrencyParser.getTslaLow()) {
@@ -107,12 +115,12 @@ public class Main {
                                 CurrencyParser.setNotification(false);
                             }
                         }
-                    }*//*
+                    }*/
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();*/
+        }).start();
 
         // testing
         /*try (Session session = HibernateUtil.getSessionFactory().openSession()) {

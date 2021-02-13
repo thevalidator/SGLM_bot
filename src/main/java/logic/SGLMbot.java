@@ -290,16 +290,18 @@ public class SGLMbot extends TelegramLongPollingBot {
     private static void updateStocks(User user) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            //Query query = session.createQuery("from UserDTO where TELEGRAM_ID = :id");
-            //query.setParameter("id", user.getTelegramId());
-            //UserDTO userDTO = (UserDTO) query.getSingleResult();
 
             UserDTO userDTO = session.get(UserDTO.class, user.getId());
-            Map<String, StockDTO> stocks = UserMapper.INSTANCE.userToUserDTO(user).getStocks();
-            userDTO.setStocks(stocks);
+            Map<String, StockDTO> stocksDTO = userDTO.getStocks();
+            for (Map.Entry<String, Stock> s: user.getStocks().entrySet()) {
+                if (stocksDTO.containsKey(s.getKey())) {
+                    stocksDTO.get(s.getKey()).mergeStock(s.getValue());
+                } else {
+                    stocksDTO.put(s.getKey(), new StockDTO(s.getValue(), userDTO));
+                }
+            }
 
-            //session.update(userDTO);
-
+            session.update(userDTO);
             transaction.commit();
             INFO.info("userID: " + user.getTelegramId() + " updated in DB.");
         } catch (Exception e) {
@@ -459,8 +461,8 @@ public class SGLMbot extends TelegramLongPollingBot {
         } else if(text.equals("Геолокация")) {
             //message.setText("GOTTCHA 5");
         } else {
-            sendTextMessage(update, "Я еще очень глуп и не понимаю, воспользуйтесь командами."
-                    , true);
+            sendTextMessage(update, "Я еще очень глуп и не понимаю, воспользуйтесь командами.",
+                    true);
         }
     }
 
@@ -482,7 +484,7 @@ public class SGLMbot extends TelegramLongPollingBot {
 
     public void sendNotification(String text, String chatId) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId("909651044");
+        sendMessage.setChatId(chatId);
         sendMessage.setText(text);
 /*        if(true) {
             sendMessage.setReplyMarkup(getReplyKeyboard());

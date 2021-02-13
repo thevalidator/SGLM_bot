@@ -10,10 +10,8 @@ public class Core {
     private static HashMap<Integer, User> userList;
 
     private Core() {
-
         setUserCount(0L);
         userList = new HashMap<>();
-
     }
 
     public static Core getInstance() {

@@ -2,6 +2,7 @@ package logic;
 
 import logic.utils.CurrencyParser;
 
+
 public enum Stocks {
     TSLA {
         @Override

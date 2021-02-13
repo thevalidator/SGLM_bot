@@ -1,6 +1,6 @@
 package logic.DTO;
 
-
+import logic.Stock;
 import javax.persistence.*;
 
 @Entity
@@ -23,6 +23,14 @@ public class StockDTO {
     private boolean notify;
 
     public StockDTO() {
+    }
+
+    public StockDTO(Stock stock, UserDTO userDTO) {
+        this.userDTO = userDTO;
+        this.name = stock.getName();
+        this.highTarget = stock.getHighTarget();
+        this.lowTarget = stock.getLowTarget();
+        this.notify = stock.hasNotify();
     }
 
     public StockDTO(long id, UserDTO userDTO, String name, Double lowTarget, Double highTarget, boolean notify) {
@@ -81,4 +89,11 @@ public class StockDTO {
     public void setNotify(boolean notify) {
         this.notify = notify;
     }
+
+    public void mergeStock(Stock stock) {
+        lowTarget = stock.getLowTarget();
+        highTarget = stock.getHighTarget();
+        notify = stock.hasNotify();
+    }
+
 }

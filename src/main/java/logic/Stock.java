@@ -5,7 +5,6 @@ import logic.utils.CurrencyParser;
 
 public class Stock {
 
-
     private long id;
     private User user;
     private String name;

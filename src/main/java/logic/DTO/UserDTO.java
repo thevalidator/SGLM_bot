@@ -149,20 +149,4 @@ public class UserDTO {
         this.stocks = stocks;
     }
 
-    public void umerge(UserDTO userDTO) {
-        id = userDTO.getId();
-        ordinalNumber = userDTO.getOrdinalNumber();
-        joinStamp = userDTO.getJoinStamp();
-        telegramId = userDTO.getTelegramId();
-        chatId = userDTO.getChatId();
-        name = userDTO.getName();
-        firstName = userDTO.getFirstName();
-        lastName = userDTO.getLastName();
-        address = userDTO.getAddress();
-        description = userDTO.getDescription();
-        subscription = userDTO.getSubscription();
-        stocks = userDTO.getStocks();
-    }
-
-
 }
