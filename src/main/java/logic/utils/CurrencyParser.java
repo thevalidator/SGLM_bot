@@ -1,4 +1,5 @@
 package logic.utils;
+import logic.Stocks;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -15,10 +16,17 @@ public class CurrencyParser {
             " Gecko/20100101 Firefox/83.0";
     public final static String noData = "No data";
 
-    private static boolean notification = true;
-    private static int tslaHigh = 846;
-    private static int tslaLow = 830;
+    private String tsla;
+    private String btc;
 
+
+    public static String getTsla() {
+        return getTSLAprice();
+    }
+
+    public static String getBtc() {
+        return getBTCPrice();
+    }
 
     /* TESLA ends in Tinkoff at 01.45 msk, in world at 04.00 msk */
     public static String getTSLAprice() {
@@ -91,28 +99,8 @@ public class CurrencyParser {
         return ethPrice;
     }
 
-    public static int getTslaHigh() {
-        return tslaHigh;
-    }
-
-    public static void setTslaHigh(int tslaHigh) {
-        CurrencyParser.tslaHigh = tslaHigh;
-    }
-
-    public static int getTslaLow() {
-        return tslaLow;
-    }
-
-    public static void setTslaLow(int tslaLow) {
-        CurrencyParser.tslaLow = tslaLow;
-    }
-
-    public static boolean hasNotification() {
-        return notification;
-    }
-
-    public static void setNotification(boolean notification) {
-        CurrencyParser.notification = notification;
+    public static String getPrice(String name) {
+        return Stocks.valueOf(name).parsePrice();
     }
 
     private static Document establishInternetConnection(String link) throws IOException {

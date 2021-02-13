@@ -4,12 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class User {
 
     private static final Logger USER_LOGGER = LogManager.getLogger("usr");
 
+    private int id;
     private int ordinalNumber;
     private LocalDateTime joinStamp;
     private Integer telegramId;
@@ -21,13 +23,12 @@ public class User {
     private Address address;
     private Subscription subscription;
     private String description;
-    private HashMap<String, Stock> stocks;
+    private Map<String, Stock> stocks = new HashMap<>();
 //    private boolean isVIP;
     //.format(DateTimeFormatter.ofPattern("d.MM.yyyy - HH:mm"))
 
     public User(){
         joinStamp = LocalDateTime.now();
-        stocks = new HashMap<>();
     }
 
     public User(Integer telegramId) {
@@ -44,6 +45,37 @@ public class User {
         this.lastName = lastName;
     }
 
+    public boolean addStock(String name) {
+        if (!stocks.containsKey(name)) {
+            for (Stocks stock: Stocks.values()) {
+                if (stock.name().equals(name)) {
+                    stocks.put(name, new Stock(name, this));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void removeStock(String name) {
+        stocks.remove(name.toUpperCase());
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Map<String, Stock> getStocks() {
+        return stocks;
+    }
+
+    public void setStocks(Map<String, Stock> stocks) {
+        this.stocks = stocks;
+    }
 
     public int getOrdinalNumber() {
         return ordinalNumber;

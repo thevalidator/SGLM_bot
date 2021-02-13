@@ -1,12 +1,11 @@
 package logic.DTO;
 
 import logic.Address;
-import logic.Stock;
 import logic.Subscription;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "USERS")
@@ -15,7 +14,7 @@ public class UserDTO {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private int id;
     @Column(name = "ORDINAL_NUMBER")
     private int ordinalNumber;
     @Column(name = "JOINED")
@@ -38,18 +37,19 @@ public class UserDTO {
     private String description;
     @Transient
     private Subscription subscription;
-    @Transient
-    private HashMap<String, Stock> stocks;
+    @OneToMany(mappedBy = "userDTO", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @MapKey(name = "name")
+    private Map<String, StockDTO> stocks = new HashMap<>();
 /*    @Transient
     private boolean isVIP;*/
 
     public UserDTO(){}
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -139,6 +139,29 @@ public class UserDTO {
 
     public void setSubscription(Subscription subscription) {
         this.subscription = subscription;
+    }
+
+    public Map<String, StockDTO> getStocks() {
+        return stocks;
+    }
+
+    public void setStocks(Map<String, StockDTO> stocks) {
+        this.stocks = stocks;
+    }
+
+    public void umerge(UserDTO userDTO) {
+        id = userDTO.getId();
+        ordinalNumber = userDTO.getOrdinalNumber();
+        joinStamp = userDTO.getJoinStamp();
+        telegramId = userDTO.getTelegramId();
+        chatId = userDTO.getChatId();
+        name = userDTO.getName();
+        firstName = userDTO.getFirstName();
+        lastName = userDTO.getLastName();
+        address = userDTO.getAddress();
+        description = userDTO.getDescription();
+        subscription = userDTO.getSubscription();
+        stocks = userDTO.getStocks();
     }
 
 

@@ -1,46 +1,37 @@
-package logic;
-
-import logic.utils.CurrencyParser;
+package logic.DTO;
 
 
-public class Stock {
+import javax.persistence.*;
 
+@Entity
+@Table(name = "STOCKS")
+public class StockDTO {
 
+    @Id
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private User user;
+    @ManyToOne
+    private UserDTO userDTO;
+    @Column(name = "NAME")
     private String name;
+    @Column(name = "LOW")
     private Double lowTarget;
+    @Column(name = "HIGH")
     private Double highTarget;
+    @Column(name = "NOTIFY")
     private boolean notify;
 
-    public Stock() {
-        name = "blank";
-        lowTarget = 0.;
-        highTarget = 0.;
-        notify = false;
+    public StockDTO() {
     }
 
-    public Stock(long id, User user, String name, Double lowTarget, Double highTarget, boolean notify) {
+    public StockDTO(long id, UserDTO userDTO, String name, Double lowTarget, Double highTarget, boolean notify) {
         this.id = id;
-        this.user = user;
+        this.userDTO = userDTO;
         this.name = name;
         this.lowTarget = lowTarget;
         this.highTarget = highTarget;
         this.notify = notify;
-    }
-
-    public Stock(String name, User user) {
-        this();
-        this.name = name;
-        this.user = user;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public long getId() {
@@ -49,6 +40,14 @@ public class Stock {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public UserDTO getUserDTO() {
+        return userDTO;
+    }
+
+    public void setUserDTO(UserDTO userDTO) {
+        this.userDTO = userDTO;
     }
 
     public String getName() {
@@ -82,9 +81,4 @@ public class Stock {
     public void setNotify(boolean notify) {
         this.notify = notify;
     }
-
-    public String getStockPrice() {
-        return CurrencyParser.getPrice(name);
-    }
-
 }

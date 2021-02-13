@@ -1,5 +1,6 @@
 package logic;
 
+import logic.DTO.StockDTO;
 import logic.DTO.UserDTO;
 import logic.items.GlataiBeer;
 import logic.items.LakaiWhisky;
@@ -24,15 +25,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
 import javax.persistence.Query;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -172,6 +169,7 @@ public class SGLMbot extends TelegramLongPollingBot {
             Transaction transaction = session.beginTransaction();
             UserDTO userDTO = UserMapper.INSTANCE.userToUserDTO(user);
             session.save(userDTO);
+            user.setId(userDTO.getId());
             transaction.commit();
             INFO.info("userID: " + userDTO.getTelegramId() + " saved to DB.");
         } catch (Exception e) {
@@ -243,7 +241,7 @@ public class SGLMbot extends TelegramLongPollingBot {
     public static void loadUsers() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
-            List<UserDTO> userDTOList = session.createQuery("from UserDTO u", UserDTO.class).list();
+            List<UserDTO> userDTOList = session.createQuery("from UserDTO u", UserDTO.class).list(); //join fetch u.stocks s
             if(!userDTOList.isEmpty()) {
                 for (UserDTO userDTO : userDTOList) {
                     User user = UserMapper.INSTANCE.userDTOToUser(userDTO);
@@ -272,7 +270,6 @@ public class SGLMbot extends TelegramLongPollingBot {
             saveUser(user);
         } else {
             User user = core.getUserList().get(id);
-            //org.telegram.telegrambots.meta.api.objects.User = update.getMessage().getFrom();
             if(user.getName() != null && !user.getName().equals(update.getMessage().getFrom().getUserName())) {
                 user.setName(update.getMessage().getFrom().getUserName());
                 updateUserName(user);
@@ -290,6 +287,26 @@ public class SGLMbot extends TelegramLongPollingBot {
         }
     }
 
+    private static void updateStocks(User user) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            //Query query = session.createQuery("from UserDTO where TELEGRAM_ID = :id");
+            //query.setParameter("id", user.getTelegramId());
+            //UserDTO userDTO = (UserDTO) query.getSingleResult();
+
+            UserDTO userDTO = session.get(UserDTO.class, user.getId());
+            Map<String, StockDTO> stocks = UserMapper.INSTANCE.userToUserDTO(user).getStocks();
+            userDTO.setStocks(stocks);
+
+            //session.update(userDTO);
+
+            transaction.commit();
+            INFO.info("userID: " + user.getTelegramId() + " updated in DB.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private static void addUserPhoneNumber(Update update) {
         int id = update.getMessage().getFrom().getId();
         User user = core.getUserList().get(id);
@@ -300,6 +317,7 @@ public class SGLMbot extends TelegramLongPollingBot {
 
     private void textMessageHandler(Update update) {
         String text = update.getMessage().getText();
+        User user = core.getUserList().get(update.getMessage().getFrom().getId());
         MSG_LOG.info("[Message]: " + text + " [UserName]: " + update.getMessage().getFrom().getUserName()
                 + " [UserId]: " + update.getMessage().getFrom().getId() + " [fname/lname]: "
                 + update.getMessage().getFrom().getFirstName() + " " +
@@ -308,37 +326,92 @@ public class SGLMbot extends TelegramLongPollingBot {
         if (isCommand(text)) {
             if(text.equalsIgnoreCase("/start")) {
                 sendTextMessage(update, Commands.HELLO, true);
+            } else if(text.matches("/add .+")) {
+                SendMessage sendMessage = new SendMessage();
+                Matcher matcher = Pattern.compile("/add (?<stockName>.+)").matcher(text);
+                matcher.find();
+                String message = matcher.group("stockName").toUpperCase();
+                sendMessage.setChatId(String.valueOf(update.getMessage().getChatId()));
+                if (user.addStock(message)) {
+                    updateStocks(user);
+                    sendMessage.setText(message + " was successfully added.");
+                } else {
+                    sendMessage.setText("Failed to add " + message +". No such stock or you have already added it.");
+                }
+                try {
+                    execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                    MSG_LOG.error("Was sent by bot: " + sendMessage.getText() + " on message: "
+                            + update.getMessage().getText() + " from chatId: " + update.getMessage().getChatId());
+                }
             } else if(text.equalsIgnoreCase("/btc")) {
                 String price = CurrencyParser.getBTCPrice();
-                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getBTCPrice()
-                        .concat(" USD")), false);
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : price.concat(" USD")),
+                        false);
             } else if(text.equalsIgnoreCase("/eth")) {
                 String price = CurrencyParser.getETHPrice();
-                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getETHPrice()
-                        .concat(" USD")), false);
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : price.concat(" USD")),
+                        false);
             } else if(text.equalsIgnoreCase("/usd")) {
                 String price = CurrencyParser.getUSDprice();
-                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getUSDprice()
-                        .concat(" RUB")), false);
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : price.concat(" RUB")),
+                        false);
             } else if(text.equalsIgnoreCase("/eur")) {
                 String price = CurrencyParser.getEURprice();
-                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getEURprice()
-                        .concat(" RUB")), false);
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : price.concat(" RUB")),
+                        false);
             } else if(text.equalsIgnoreCase("/tsla")) {
                 String price = CurrencyParser.getTSLAprice();
-                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : CurrencyParser.getTSLAprice()
-                        .concat(" USD")), false);
-            } else if(text.equalsIgnoreCase("/tslabell")) {
-                CurrencyParser.setNotification(true);
-            } else if(text.equalsIgnoreCase("/tslalow")) {
-                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaLow()), false);
-            } else if(text.equalsIgnoreCase("/tslahigh")) {
-                sendTextMessage(update, String.valueOf(CurrencyParser.getTslaHigh()), false);
-            } else if(text.matches("/tslaset \\d+ \\d+")) {
-                Matcher matcher = Pattern.compile("/tslaset (?<low>\\d+) (?<high>\\d+)").matcher(text);
+                sendTextMessage(update, (price.equals(CurrencyParser.noData) ? price : price.concat(" USD")),
+                        false);
+            } else if(text.matches("/bell .+ \\d+")) {
+                Matcher matcher = Pattern.compile("/bell (?<stockName>.+) (?<bell>\\d+)").matcher(text);
                 matcher.find();
-                CurrencyParser.setTslaLow(Integer.parseInt(matcher.group("low")));
-                CurrencyParser.setTslaHigh(Integer.parseInt(matcher.group("high")));
+                String stockName = matcher.group("stockName").toUpperCase();
+                int trigger = Integer.parseInt(matcher.group("bell"));
+                if (user.getStocks().containsKey(stockName)) {
+                    if (trigger == 1) {
+                        user.getStocks().get(Stocks.valueOf(stockName).name()).setNotify(true);
+                        sendTextMessage(update, "Notification is ON", true);
+                    } else if (trigger == 0) {
+                        user.getStocks().get(Stocks.valueOf(stockName).name()).setNotify(false);
+                        sendTextMessage(update, "Notification is OFF", true);
+                    }
+                    updateStocks(user);
+                } else {
+                    sendTextMessage(update, "No stock. Add the stock first.", true);
+                }
+            } else if(text.matches("/low .+")) {
+                Matcher matcher = Pattern.compile("/low (?<stockName>.+)").matcher(text);
+                matcher.find();
+                String stockName = matcher.group("stockName").toUpperCase();
+                if (user.getStocks().containsKey(stockName)) {
+                    sendTextMessage(update,String.valueOf(user.getStocks().get(Stocks.valueOf(stockName).name())
+                                    .getLowTarget()), false);
+                }
+            } else if(text.matches("/high .+")) {
+                Matcher matcher = Pattern.compile("/high (?<stockName>.+)").matcher(text);
+                matcher.find();
+                String stockName = matcher.group("stockName").toUpperCase();
+                if (user.getStocks().containsKey(stockName)) {
+                    sendTextMessage(update,String.valueOf(user.getStocks().get(Stocks.valueOf(stockName).name())
+                            .getHighTarget()), false);
+                }
+            } else if(text.matches("/set .+ \\d+ \\d+")) {
+                Matcher matcher = Pattern.compile("/set (?<stockName>.+) (?<low>\\d+) (?<high>\\d+)").matcher(text);
+                matcher.find();
+                String stockName = matcher.group("stockName").toUpperCase();
+                double low = Double.parseDouble(matcher.group("low"));
+                double high = Double.parseDouble(matcher.group("high"));
+
+                if (user.getStocks().containsKey(Stocks.valueOf(stockName).name())) {
+                    user.getStocks().get(Stocks.valueOf(stockName).name()).setLowTarget(low);
+                    user.getStocks().get(Stocks.valueOf(stockName).name()).setHighTarget(high);
+                    updateStocks(user);
+                    sendTextMessage(update, "Limits were set.", true);
+                }
+
             } else if(text.equalsIgnoreCase("/name")) {
                 String messageText = "Приветствую вас, ".concat(update.getMessage().getFrom().getFirstName())
                         .concat("!");
@@ -407,13 +480,13 @@ public class SGLMbot extends TelegramLongPollingBot {
         }
     }
 
-    public void sendNotification(String text) {
+    public void sendNotification(String text, String chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId("909651044");
         sendMessage.setText(text);
-        if(true) {
+/*        if(true) {
             sendMessage.setReplyMarkup(getReplyKeyboard());
-        }
+        }*/
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
